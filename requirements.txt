@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+websockets
+httpx
+feedparser
+pandas
+anthropic
+# Kronos (optional, via setup.sh): torch, einops, huggingface_hub, safetensors
