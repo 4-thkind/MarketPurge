@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MarketPulse</title>
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  :root{--bg:#0b0d10;--panel:#12151a;--line:#1f242c;--txt:#d7dce3;--mute:#7c8592;--up:#16c784;--down:#ea3943;--acc:#f0b90b}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
+  header{display:flex;align-items:baseline;gap:20px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  h1{font-size:15px;margin:0;letter-spacing:.08em}h1 b{color:var(--acc)}
+  #px{font-size:26px;font-weight:700}.lat{color:var(--mute);font-size:11px}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--down);margin-right:6px}.dot.on{background:var(--up)}
+  main{display:grid;grid-template-columns:2fr 1fr;gap:1px;background:var(--line)}
+  section{background:var(--panel);padding:12px 14px;min-width:0}h2{font-size:11px;color:var(--mute);margin:0 0 8px;letter-spacing:.1em;font-weight:500}
+  #chart{height:340px}.span2{grid-column:1/-1}
+  .heat{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:3px}
+  .tile{padding:8px 6px;border-radius:3px;text-align:center;transition:background .4s}.tile b{display:block;font-size:11px}.tile span{font-size:12px}
+  #news{list-style:none;margin:0;padding:0;max-height:330px;overflow:auto}#news li{padding:6px 0;border-bottom:1px solid var(--line)}
+  #news a{color:var(--txt);text-decoration:none}#news a:hover{color:var(--acc)}#news small{color:var(--mute);display:block}
+  #news li.new{animation:flash .5s 4 alternate}@keyframes flash{from{background:transparent}to{background:#f0b90b33}}
+  .chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}.chips button.on{border-color:var(--acc);color:var(--acc)}
+  .legend{float:right}.legend i{font-style:normal;padding:1px 5px;margin-left:2px;color:#fff;font-size:10px;border-radius:2px}
+  #news li.hide{display:none}
+  .kv{display:flex;justify-content:space-between;padding:3px 0}.kv span:first-child{color:var(--mute)}
+  .up{color:var(--up)}.down{color:var(--down)}#brief{white-space:pre-wrap}
+  button{background:none;border:1px solid var(--line);color:var(--txt);padding:3px 8px;cursor:pointer;font:inherit;font-size:11px}
+  @media(max-width:900px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1><b>MARKET</b>PULSE</h1>
+  <div><span class="dot" id="conn"></span><span id="sym">BTCUSD · Bitstamp</span></div>
+  <div id="px">—</div>
+  <div class="lat">feed latency <span id="lat">—</span> ms · <span id="tps">0</span> ticks/s</div>
+  <div class="lat">open interest <span id="oi">—</span> · funding <span id="fund">—</span></div>
+</header>
+<main>
+  <section><h2>BTCUSD · 1m · LIVE + MODEL FORECAST</h2><div id="chart"></div></section>
+  <section>
+    <h2>FORECAST MODEL</h2><div id="fc"></div>
+    <h2 style="margin-top:14px">PAPER TRADING (₮100,000 start, fees on)</h2><div id="paper"></div>
+  </section>
+  <section>
+    <h2>NSE INDICES <span class="legend"><i style="background:rgba(22,199,132,.85)">+3%</i><i style="background:rgba(22,199,132,.35)">+1%</i><i style="background:rgba(234,57,67,.35)">−1%</i><i style="background:rgba(234,57,67,.85)">−3%</i></span></h2>
+    <div class="chips" id="cats"></div><div class="heat" id="idx"></div>
+    <h2 id="nseTitle" style="margin-top:14px">NIFTY 50 HEATMAP</h2><div class="heat" id="nse"></div>
+  </section>
+  <section><h2>NEWS FLOW</h2><div class="chips" id="mkts"></div><ul id="news"></ul></section>
+  <section><h2>CRYPTO HEATMAP · 24H</h2><div class="heat" id="crypto"></div></section>
+  <section><h2>AI ANALYST <button onclick="regen()">refresh</button></h2><div id="brief">Warming up…</div></section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (n, d = 2) => n == null ? "—" : Number(n).toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const chart = LightweightCharts.createChart($("chart"), {layout:{background:{color:"#12151a"},textColor:"#7c8592"},
+  grid:{vertLines:{color:"#1a1e25"},horzLines:{color:"#1a1e25"}}, timeScale:{timeVisible:true}, autoSize:true});
+const candles = chart.addCandlestickSeries({upColor:"#16c784",downColor:"#ea3943",borderVisible:false,wickUpColor:"#16c784",wickDownColor:"#ea3943"});
+const fcLine = chart.addLineSeries({color:"#f0b90b",lineWidth:2,lineStyle:2});
+const toBar = c => ({time: c.t / 1000 + 19800, open: c.o, high: c.h, low: c.l, close: c.c}); // shift to IST for axis labels
+
+// heat colour: clamp ±3% to a red/green ramp
+const heatBg = chg => { const a = Math.min(Math.abs(chg) / 3, 1) * .75 + .1; return chg >= 0 ? `rgba(22,199,132,${a})` : `rgba(234,57,67,${a})`; };
+const heat = {nse: {}, crypto: {}};
+function drawHeat(id, data, sizeKey) {
+  Object.assign(heat[id], data);
+  const rows = Object.entries(heat[id]).filter(([k]) => k !== "__index__")
+    .sort((a, b) => (b[1][sizeKey] || 0) - (a[1][sizeKey] || 0));
+  $(id).innerHTML = rows.map(([s, v]) => `<div class="tile" style="background:${heatBg(v.chg)}"><b>${esc(s.replace("USDT",""))}</b><span>${v.chg >= 0 ? "+" : ""}${fmt(v.chg)}%</span></div>`).join("");
+  const ix = heat.nse.__index__;
+  if (id === "nse" && ix) $("nseTitle").innerHTML = `${esc(ix.name)} HEATMAP · <span class="${ix.chg>=0?"up":"down"}">${fmt(ix.p)} (${ix.chg>=0?"+":""}${fmt(ix.chg)}%)</span>`;
+}
+
+// News Flow-style: market filter chips, "x min ago" that keeps ticking, new headlines flash twice
+let mkt = "All";
+const ago = ts => { const s = (Date.now() - ts) / 1000; return s < 60 ? "just now" : s < 3600 ? `${s / 60 | 0} min ago` : s < 86400 ? `${s / 3600 | 0} h ago` : new Date(ts).toLocaleDateString(); };
+const applyMkt = () => [...$("news").children].forEach(li => li.classList.toggle("hide", mkt !== "All" && li.dataset.m !== mkt));
+$("mkts").innerHTML = ["All", "India", "Global", "Crypto"].map(m => `<button class="${m === mkt ? "on" : ""}">${m}</button>`).join("");
+$("mkts").onclick = e => { if (e.target.tagName !== "BUTTON") return; mkt = e.target.textContent;
+  [...$("mkts").children].forEach(b => b.classList.toggle("on", b === e.target)); applyMkt(); };
+setInterval(() => document.querySelectorAll("#news small[data-ts]").forEach(s => s.lastChild.textContent = ago(+s.dataset.ts)), 30000);
+function addNews(n, fresh) {
+  const li = document.createElement("li");
+  li.dataset.m = n.market || "";
+  if (fresh) li.className = "new";
+  if (mkt !== "All" && li.dataset.m !== mkt) li.classList.add("hide");
+  li.innerHTML = `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a><small data-ts="${n.ts}">${esc(n.src)} · ${esc(n.market || "")} · <span>${ago(n.ts)}</span></small>`;
+  $("news").prepend(li);
+  while ($("news").children.length > 60) $("news").lastChild.remove();
+}
+
+// NSE index heatmap with the same 4 category tabs as nseindia.com
+let cat = "Broad Market Indices", indices = {};
+function drawIdx(d) {
+  if (d) indices = d;
+  $("cats").innerHTML = Object.keys(indices).map(c => `<button class="${c === cat ? "on" : ""}">${esc(c.replace(" Indices", ""))}</button>`).join("");
+  $("idx").innerHTML = (indices[cat] || []).map(i => `<div class="tile" style="background:${heatBg(i.chg)}"><b>${esc(i.name)}</b><span>${fmt(i.p)} · ${i.chg >= 0 ? "+" : ""}${fmt(i.chg)}%</span></div>`).join("");
+}
+$("cats").onclick = e => { if (e.target.tagName !== "BUTTON") return; cat = Object.keys(indices).find(c => c.startsWith(e.target.textContent)); drawIdx(); };
+const drawDeriv = d => { $("oi").textContent = `$${fmt(d.oi_usd / 1e9)}B`; $("fund").textContent = `${fmt(d.funding_pct, 4)}%`; };
+
+function drawForecast(f) {
+  const cls = f.ret_pct >= 0 ? "up" : "down", acc = f.acc.n ? `${fmt(100 * f.acc.hits / f.acc.n, 1)}% (${f.acc.n})` : "scoring…";
+  $("fc").innerHTML = `<div class="kv"><span>engine</span><span>${esc(f.engine)}</span></div>
+    <div class="kv"><span>next ${f.horizon_min}m</span><span class="${cls}">${f.ret_pct>=0?"+":""}${fmt(f.ret_pct,3)}% → ${fmt(f.path.at(-1))}</span></div>
+    <div class="kv"><span>live direction hit-rate</span><span>${acc}</span></div>`;
+  fcLine.setData(f.path.map((p, i) => ({time: f.from_t / 1000 + 19800 + 60 * (i + 1), value: p})));
+}
+
+function drawPaper(p) {
+  $("paper").innerHTML = `<div class="kv"><span>equity</span><span>${fmt(p.equity)}</span></div>
+    <div class="kv"><span>P&amp;L</span><span class="${p.pnl_pct>=0?"up":"down"}">${p.pnl_pct>=0?"+":""}${fmt(p.pnl_pct,3)}%</span></div>
+    <div class="kv"><span>position · trades</span><span>${p.pos} · ${p.n}</span></div>`;
+}
+
+let ticks = 0, lastPx = 0;
+setInterval(() => { $("tps").textContent = ticks; ticks = 0; }, 1000);
+const handlers = {
+  snapshot(s) {
+    candles.setData(s.candles.map(toBar));
+    drawHeat("nse", s.nse_heat, "vol"); drawIdx(s.nse_indices); s.deriv && drawDeriv(s.deriv); drawHeat("crypto", s.crypto_heat, "vol");
+    $("news").innerHTML = ""; s.news.slice().reverse().forEach(n => addNews(n));
+    s.forecast && drawForecast(s.forecast); s.paper && drawPaper(s.paper); s.brief && ($("brief").textContent = s.brief.text);
+  },
+  btc(t, src) {
+    ticks++;
+    $("px").textContent = fmt(t.p);
+    $("px").className = t.p >= lastPx ? "up" : "down"; lastPx = t.p;
+    $("lat").textContent = Math.max(0, Date.now() - src); // exchange timestamp -> browser (needs synced clocks)
+  },
+  candle: c => candles.update(toBar(c)),
+  nse_heat: d => drawHeat("nse", d, "vol"),
+  nse_indices: drawIdx, deriv: drawDeriv,
+  crypto_heat: d => drawHeat("crypto", d, "vol"),
+  news: n => addNews(n, true),
+  news_reset: list => { $("news").innerHTML = ""; list.slice().reverse().forEach(n => addNews(n)); },
+  forecast: drawForecast, paper: drawPaper,
+  brief: b => $("brief").textContent = b.text,
+};
+
+function connect() {
+  const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
+  ws.onopen = () => $("conn").classList.add("on");
+  ws.onmessage = e => { const m = JSON.parse(e.data); handlers[m.k]?.(m.d, m.src); };
+  ws.onclose = () => { $("conn").classList.remove("on"); setTimeout(connect, 1500); };
+}
+connect();
+async function regen() { $("brief").textContent = "Thinking…"; const b = await (await fetch("/api/brief")).json(); $("brief").textContent = b.text; }
+</script>
+</body>
+</html>
