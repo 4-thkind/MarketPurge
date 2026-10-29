@@ -1,0 +1,29 @@
+# Local handoff notes — stay on my machine, not in the repo
+HANDOFF.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Kronos vendor clone (setup.sh re-clones it)
+vendor/
+
+# Secrets / local env
+.env
+.env.*
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
