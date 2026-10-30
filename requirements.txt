@@ -5,4 +5,4 @@ httpx
 feedparser
 pandas
 anthropic
-# Kronos (optional, via setup.sh): torch, einops, huggingface_hub, safetensors
+# Kronos (optional, via setup.sh): torch, einops, huggingface_hub, hf_xet, safetensors
