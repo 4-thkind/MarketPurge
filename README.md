@@ -3,9 +3,10 @@
 Live market data → our own API → our own model → one dashboard.
 
 ```
-Binance WS (BTC ticks, 1m candles, crypto heatmap) ─┐
-NSE NIFTY 50 (heatmap, ~3s)                         ├─► Hub (in-memory, push) ─► /ws + /api/snapshot ─► dashboard
-RSS news (ET, Moneycontrol, Mint, CoinDesk…, ~10s)  ┘          │
+Bitstamp WS (BTC ticks, 1m candles)                 ─┐
+Binance WS + REST (crypto heatmap, OI, funding)     ─┤
+NSE indices + NIFTY 50 heatmap (polled 5s)          ├─► Hub (in-memory, push) ─► /ws + /api/snapshot ─► dashboard
+RSS news (ET, Mint, BS, CNBC, CoinDesk…, ~10s)      ┘          │
                                                                ├─► Forecaster (Kronos) ─► Paper trader
                                                                └─► AI Analyst (Claude) ─► investor brief
 ```
@@ -20,7 +21,7 @@ export ANTHROPIC_API_KEY=...              # enables the AI analyst panel
 
 ## Latency, honestly
 - **BTC**: push WebSocket from the exchange. Every tick carries the exchange timestamp; the header shows real exchange→browser latency (typically 100–300 ms from India).
-- **NSE**: the free/unofficial endpoint updates every few seconds. True tick-level NSE data needs a broker feed (Kite Connect, Upstox, Angel SmartAPI). Swap `feeds/nse.py:fetch` for the broker's tick handler; nothing downstream changes.
+- **NSE**: the free/unofficial endpoint updates every few seconds. True tick-level NSE data needs a broker feed (Kite Connect, Upstox, Angel SmartAPI). Swap the fetching in `feeds/nse.py` for the broker's tick handler; nothing downstream changes.
 - **News**: RSS with conditional GET; a headline appears within ~10 s of the publisher pushing it.
 
 ## Model
