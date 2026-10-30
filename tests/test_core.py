@@ -37,8 +37,11 @@ def test_candles_from_trades():
     assert hub.candles[0]["h"] == 105
 
 
-def test_forecast_baseline():
+def test_forecast_baseline(monkeypatch):
+    from backend.model import forecaster
     from backend.model.forecaster import forecast, PRED_LEN
+    monkeypatch.setattr(forecaster, "_pred", None)  # pin the EMA path even when Kronos is installed
     c = [{"t": i * 60000, "o": 100 + i, "h": 101 + i, "l": 99 + i, "c": 100 + i, "v": 1, "a": 1} for i in range(200)]
     p = forecast(c)
     assert len(p) == PRED_LEN and p[-1] > c[-1]["c"]
+    assert all(type(v) is float for v in p)  # numpy floats leak np.bool_/int64 into hub state and break json
