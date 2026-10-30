@@ -56,6 +56,10 @@ async def run():
                     r.raise_for_status()
 
                 indices = {t: parse_indices(r.json()) for t, r in zip(CATEGORIES, idx_res)}
+                # NSE's CDN sometimes serves an older snapshot than the last poll; never step backwards
+                old = hub.state["nse_indices"].get(CATEGORIES[0])
+                if old and nse_ts(indices[CATEGORIES[0]][0]["ts"]) < nse_ts(old[0]["ts"]):
+                    indices = hub.state["nse_indices"]
                 if indices != hub.state["nse_indices"]:
                     hub.state["nse_indices"] = indices
                     hub.publish("nse_indices", indices, nse_ts(indices[CATEGORIES[0]][0]["ts"]))
@@ -64,7 +68,9 @@ async def run():
                 me = next((i for i in indices[INDEX_CAT] if i["name"] == INDEX), None)
                 if me:
                     heat["__index__"] = {"name": me["name"], "p": me["p"], "chg": me["chg"]}
-                changed = {k: v for k, v in heat.items() if hub.state["nse_heat"].get(k) != v}
+                prev = hub.state["nse_heat"]
+                changed = {k: v for k, v in heat.items() if prev.get(k) != v
+                           and ("ts" not in v or k not in prev or nse_ts(v["ts"]) >= nse_ts(prev[k]["ts"]))}
                 if changed:  # only push deltas
                     hub.state["nse_heat"].update(changed)
                     newest = max((v["ts"] for v in heat.values() if "ts" in v), key=nse_ts)
