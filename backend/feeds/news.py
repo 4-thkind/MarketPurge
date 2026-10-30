@@ -6,14 +6,14 @@ import feedparser, httpx
 from ..hub import hub
 
 # (url, market) - market drives the filter chips, like TradingView News Flow's "Market" filter.
+# Moneycontrol dropped: all its RSS feeds stopped updating in Apr 2024 (checked 29-Oct-2026).
 # TradingView's own feed is licensed (Reuters, Dow Jones...) and can't be redistributed; these are public RSS.
 FEEDS = {
     "ET Markets": ("https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms", "India"),
-    "Moneycontrol": ("https://www.moneycontrol.com/rss/marketreports.xml", "India"),
     "Livemint": ("https://www.livemint.com/rss/markets", "India"),
     "Business Standard": ("https://www.business-standard.com/rss/markets-106.rss", "India"),
     "CNBC": ("https://www.cnbc.com/id/100003114/device/rss/rss.html", "Global"),
-    "Yahoo Finance": ("https://finance.yahoo.com/news/rssindex", "Global"),
+    "Yahoo Finance": ("https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC&region=US&lang=en-US", "Global"),
     "CoinDesk": ("https://www.coindesk.com/arc/outboundfeeds/rss/", "Crypto"),
     "Cointelegraph": ("https://cointelegraph.com/rss", "Crypto"),
 }
