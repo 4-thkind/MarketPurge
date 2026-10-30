@@ -8,7 +8,7 @@ EVERY = int(os.getenv("BRIEF_EVERY_S", "300"))
 PROMPT = """You are a markets desk analyst. Using ONLY the live data below, write "Key facts right now":
 3-5 one-line bullets covering BTC (price, derivatives positioning, what the forecast model says and its live
 hit rate), NIFTY (breadth, biggest movers, strongest/weakest sector index), and the headlines that matter.
-End each bullet with its source in brackets, e.g. [Bitstamp], [NSE], [Moneycontrol], [Model].
+End each bullet with its source in brackets, e.g. [Bitstamp], [NSE], [ET Markets], [Model].
 Max 120 words. No advice, no hype. Skip anything the data doesn't support.
 
 DATA:
@@ -33,11 +33,12 @@ def _context():
 
 async def brief():
     if not os.getenv("ANTHROPIC_API_KEY"):
-        return {"text": "Set ANTHROPIC_API_KEY to enable the AI analyst.", "model": None}
-    from anthropic import AsyncAnthropic
-    r = await AsyncAnthropic().messages.create(model=MODEL, max_tokens=400,
-                                               messages=[{"role": "user", "content": PROMPT.format(data=_context())}])
-    b = {"text": r.content[0].text, "model": MODEL}
+        b = {"text": "Set ANTHROPIC_API_KEY to enable the AI analyst.", "model": None}
+    else:
+        from anthropic import AsyncAnthropic
+        r = await AsyncAnthropic().messages.create(model=MODEL, max_tokens=400,
+                                                   messages=[{"role": "user", "content": PROMPT.format(data=_context())}])
+        b = {"text": r.content[0].text, "model": MODEL}
     hub.state["brief"] = b
     hub.publish("brief", b)
     return b
