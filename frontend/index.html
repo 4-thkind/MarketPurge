@@ -1,145 +1,1207 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MarketPulse</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Veritas · MarketPulse | Real-Time Market Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <style>
-  :root{--bg:#0b0d10;--panel:#12151a;--line:#1f242c;--txt:#d7dce3;--mute:#7c8592;--up:#16c784;--down:#ea3943;--acc:#f0b90b}
-  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}
-  header{display:flex;align-items:baseline;gap:20px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-  h1{font-size:15px;margin:0;letter-spacing:.08em}h1 b{color:var(--acc)}
-  #px{font-size:26px;font-weight:700}.lat{color:var(--mute);font-size:11px}
-  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--down);margin-right:6px}.dot.on{background:var(--up)}
-  main{display:grid;grid-template-columns:2fr 1fr;gap:1px;background:var(--line)}
-  section{background:var(--panel);padding:12px 14px;min-width:0}h2{font-size:11px;color:var(--mute);margin:0 0 8px;letter-spacing:.1em;font-weight:500}
-  #chart{height:340px}.span2{grid-column:1/-1}
-  .heat{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:3px}
-  .tile{padding:8px 6px;border-radius:3px;text-align:center;transition:background .4s}.tile b{display:block;font-size:11px}.tile span{font-size:12px}
-  #news{list-style:none;margin:0;padding:0;max-height:330px;overflow:auto}#news li{padding:6px 0;border-bottom:1px solid var(--line)}
-  #news a{color:var(--txt);text-decoration:none}#news a:hover{color:var(--acc)}#news small{color:var(--mute);display:block}
-  #news li.new{animation:flash .5s 4 alternate}@keyframes flash{from{background:transparent}to{background:#f0b90b33}}
-  .chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}.chips button.on{border-color:var(--acc);color:var(--acc)}
-  .legend{float:right}.legend i{font-style:normal;padding:1px 5px;margin-left:2px;color:#fff;font-size:10px;border-radius:2px}
-  #news li.hide{display:none}
-  .kv{display:flex;justify-content:space-between;padding:3px 0}.kv span:first-child{color:var(--mute)}
-  .up{color:var(--up)}.down{color:var(--down)}#brief{white-space:pre-wrap}
-  button{background:none;border:1px solid var(--line);color:var(--txt);padding:3px 8px;cursor:pointer;font:inherit;font-size:11px}
-  @media(max-width:900px){main{grid-template-columns:1fr}}
+  :root {
+    --veritas-red: #de0216;
+    --veritas-red-glow: rgba(222, 2, 22, 0.42);
+    --veritas-red-soft: rgba(222, 2, 22, 0.12);
+    --veritas-gold: #fecc1c;
+    --veritas-emerald: #10b981;
+    --bg-base: #060709;
+    --bg-header: #0a0c10;
+    --bg-panel: #0d0f15;
+    --bg-panel-alt: #11141d;
+    --bg-panel-header: #141722;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(222, 2, 22, 0.45);
+    --border-wine: #2c171a;
+    --txt: #f4f4f6;
+    --txt-muted: #9ca3af;
+    --txt-dim: #71717a;
+    --up: #10b981;
+    --down: #de0216;
+    --acc: #de0216;
+    --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --font-masthead: 'Cinzel', 'Newsreader', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg-base);
+    color: var(--txt);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Utility Top Bar */
+  .veritas-topbar {
+    background: #08090d;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 6px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--txt-muted);
+    font-family: var(--font-mono);
+  }
+  .veritas-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .veritas-date {
+    letter-spacing: 0.04em;
+    color: var(--txt-muted);
+  }
+  .veritas-tagline-top {
+    color: var(--txt-dim);
+    font-style: italic;
+    font-family: var(--font-serif);
+    font-size: 12px;
+  }
+  .veritas-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  /* Search Pill */
+  .veritas-search {
+    position: relative;
+    width: 38px;
+    height: 34px;
+    background: #0d0f14;
+    border: 1px solid #222631;
+    border-radius: 999px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+  }
+  .veritas-search:hover,
+  .veritas-search:focus-within {
+    width: 190px;
+    border-color: var(--veritas-red);
+    box-shadow: 0 0 12px var(--veritas-red-soft);
+  }
+  .veritas-search input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: #fff;
+    padding: 0 32px 0 14px;
+    font-size: 11px;
+    font-family: var(--font-sans);
+    outline: none;
+    transition: width 0.3s ease;
+  }
+  .veritas-search:hover input,
+  .veritas-search:focus-within input {
+    width: 100%;
+  }
+  .veritas-search .fa-search {
+    position: absolute;
+    right: 10px;
+    top: 9px;
+    color: var(--txt-dim);
+    font-size: 12px;
+    pointer-events: none;
+    transition: color 0.2s;
+  }
+  .veritas-search:hover .fa-search,
+  .veritas-search:focus-within .fa-search {
+    color: var(--veritas-red);
+  }
+
+  /* LIVE CTA Button */
+  .live-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(222, 2, 22, 0.85);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-family: var(--font-sans);
+    background: var(--veritas-red);
+    box-shadow: 0 0 0 1px rgba(222, 2, 22, 0.5), 0 0 14px rgba(222, 2, 22, 0.35);
+    text-decoration: none;
+    cursor: default;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .live-cta-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.65);
+    animation: liveBlink 1.05s ease-in-out infinite;
+  }
+  @keyframes liveBlink {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(0.92);
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.45);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(1.2);
+      box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+    }
+  }
+
+  /* Main Masthead */
+  .veritas-masthead {
+    background: linear-gradient(180deg, #090b10 0%, #050608 100%);
+    border-bottom: 1px solid var(--border-wine);
+    padding: 18px 24px 14px;
+    text-align: center;
+    position: relative;
+  }
+  .veritas-brand {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+  }
+  .veritas-brand-sub {
+    font-family: var(--font-masthead);
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--veritas-red);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .veritas-brand-title {
+    font-family: var(--font-masthead);
+    font-size: 26px;
+    letter-spacing: 0.16em;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  .veritas-brand-title span.slash {
+    color: var(--veritas-red);
+    font-weight: 300;
+  }
+  .veritas-brand-title b {
+    color: var(--veritas-red);
+    font-weight: 900;
+  }
+  .veritas-brand-tagline {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--txt-muted);
+    margin-top: 4px;
+    letter-spacing: 0.03em;
+  }
+
+  /* Live HUD Strip */
+  header.veritas-hud {
+    background: #0a0c12;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+  }
+  .hud-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .hud-symbol-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #12151e;
+    border: 1px solid #1f2533;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #e2e8f0;
+  }
+  .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--veritas-red);
+    box-shadow: 0 0 8px rgba(222, 2, 22, 0.6);
+    transition: background 0.3s;
+  }
+  .dot.on {
+    background: var(--veritas-emerald);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  }
+
+  #px {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    padding: 0 4px;
+    border-radius: 4px;
+    transition: background 0.25s, color 0.25s;
+  }
+  #px.up {
+    color: var(--veritas-emerald);
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+  }
+  #px.down {
+    color: var(--veritas-red);
+    text-shadow: 0 0 10px rgba(222, 2, 22, 0.35);
+  }
+
+  .hud-metrics {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--txt-muted);
+  }
+  .hud-metrics .metric-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .hud-metrics .metric-label {
+    color: var(--txt-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 10px;
+  }
+  .hud-metrics .metric-val {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* Sub-Navigation Ribbon */
+  .veritas-nav-ribbon {
+    background: #090a0f;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0 20px;
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .veritas-nav-ribbon::-webkit-scrollbar { display: none; }
+  .veritas-nav-item {
+    padding: 10px 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--txt-muted);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .veritas-nav-item:hover {
+    color: #fff;
+    border-bottom-color: var(--veritas-red);
+  }
+  .veritas-nav-item.active {
+    color: #fff;
+    border-bottom-color: var(--veritas-red);
+  }
+
+  /* Main Grid */
+  main {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--bg-base);
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* Panels / Cards */
+  section {
+    background: var(--bg-panel);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 6px;
+    padding: 14px 16px;
+    min-width: 0;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  section:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  /* Card Headings */
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  h2 {
+    font-family: var(--font-serif);
+    font-size: 13.5px;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2::before {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 12px;
+    background: var(--veritas-red);
+    border-radius: 1px;
+  }
+  .sub-h2 {
+    font-family: var(--font-serif);
+    font-size: 12.5px;
+    color: #e2e8f0;
+    margin: 16px 0 8px;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sub-h2::before {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 10px;
+    background: var(--veritas-gold);
+    border-radius: 1px;
+  }
+
+  .badge-tag {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    background: #161a24;
+    border: 1px solid #252b3a;
+    color: var(--txt-muted);
+    letter-spacing: 0.06em;
+  }
+
+  /* Chart Container */
+  #chart {
+    height: 350px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  /* Heatmap Layout */
+  .heat {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 4px;
+  }
+  .tile {
+    padding: 8px 6px;
+    border-radius: 4px;
+    text-align: center;
+    transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-family: var(--font-mono);
+  }
+  .tile:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.15);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+  }
+  .tile b {
+    display: block;
+    font-size: 11px;
+    color: #ffffff;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .tile span {
+    font-size: 11.5px;
+    color: #f1f5f9;
+    font-weight: 500;
+  }
+
+  /* News Flow Section */
+  #news {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 340px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #262c3b transparent;
+  }
+  #news::-webkit-scrollbar {
+    width: 5px;
+  }
+  #news::-webkit-scrollbar-thumb {
+    background: #262c3b;
+    border-radius: 3px;
+  }
+  #news li {
+    padding: 9px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.18s;
+  }
+  #news li:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  #news a {
+    color: #f1f5f9;
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.45;
+    display: block;
+    transition: color 0.18s;
+  }
+  #news a:hover {
+    color: var(--veritas-red);
+    text-decoration: underline;
+  }
+  #news small {
+    color: var(--txt-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10.5px;
+    margin-top: 4px;
+    font-family: var(--font-mono);
+  }
+  .news-badge {
+    background: #141822;
+    border: 1px solid #232938;
+    color: #94a3b8;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9.5px;
+  }
+  #news li.new {
+    animation: veritasFlash 0.6s 4 alternate;
+  }
+  @keyframes veritasFlash {
+    from { background: transparent; }
+    to { background: rgba(222, 2, 22, 0.25); }
+  }
+  #news li.hide { display: none; }
+
+  /* Chips / Filters */
+  .chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  button {
+    background: #12151e;
+    border: 1px solid #222836;
+    color: var(--txt-muted);
+    padding: 4px 10px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  button:hover {
+    background: #181d2a;
+    color: #fff;
+    border-color: rgba(222, 2, 22, 0.5);
+  }
+  .chips button.on {
+    border-color: var(--veritas-red);
+    background: var(--veritas-red-soft);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 0 8px rgba(222, 2, 22, 0.25);
+  }
+
+  .legend {
+    float: right;
+    font-family: var(--font-mono);
+  }
+  .legend i {
+    font-style: normal;
+    padding: 2px 6px;
+    margin-left: 3px;
+    color: #fff;
+    font-size: 9.5px;
+    border-radius: 3px;
+  }
+
+  /* Key-Value Pair HUD in Cards */
+  .kv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    background: #10131a;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+  .kv span:first-child {
+    color: var(--txt-muted);
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+  }
+  .kv span:last-child {
+    font-weight: 600;
+  }
+
+  .up { color: var(--veritas-emerald); }
+  .down { color: var(--veritas-red); }
+
+  /* AI Analyst Brief */
+  #brief {
+    white-space: pre-wrap;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    line-height: 1.7;
+    color: #cbd5e1;
+    background: #090b10;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--veritas-red);
+    padding: 14px 16px;
+    border-radius: 4px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .veritas-loader-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 0;
+    gap: 12px;
+    color: var(--txt-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .veritas-loader {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: 2px solid rgba(255,255,255,0.12);
+    border-top-color: var(--veritas-red);
+    border-right-color: var(--veritas-gold);
+    animation: veritasSpin 1s linear infinite;
+    box-shadow: 0 0 16px rgba(222, 2, 22, 0.25);
+  }
+  @keyframes veritasSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Veritas Signature Footer */
+  .veritas-footer {
+    background: #07080b;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    margin-top: 30px;
+    padding: 36px 20px 20px;
+  }
+  .veritas-footer-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .veritas-footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.6fr;
+    gap: 2.5rem;
+    align-items: start;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .veritas-footer-logo-title {
+    font-family: var(--font-masthead);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    color: #fff;
+    margin: 0;
+  }
+  .veritas-footer-logo-title span {
+    color: var(--veritas-red);
+  }
+  .veritas-footer-tagline {
+    margin-top: 0.8rem;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .veritas-footer-mission {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.38);
+    line-height: 1.65;
+    max-width: 38ch;
+  }
+  .veritas-footer-col-heading {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 1rem;
+    font-family: var(--font-sans);
+  }
+  .veritas-footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+  .veritas-footer-link {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    transition: color 0.16s;
+    cursor: pointer;
+  }
+  .veritas-footer-link:hover { color: #fff; }
+  .veritas-footer-link--live {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .veritas-footer-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--veritas-red);
+    flex-shrink: 0;
+    animation: liveBlink 1.05s ease-in-out infinite;
+  }
+  .veritas-newsletter-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.8rem;
+    color: #fff;
+    outline: none;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+  .veritas-newsletter-input:focus {
+    border-color: var(--veritas-red);
+  }
+  .veritas-newsletter-btn {
+    width: 100%;
+    background: var(--veritas-red);
+    border: none;
+    border-radius: 4px;
+    padding: 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    cursor: pointer;
+    transition: filter 0.18s;
+  }
+  .veritas-newsletter-btn:hover {
+    filter: brightness(1.15);
+  }
+  .veritas-footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 18px;
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.28);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media(max-width: 1024px) {
+    main { grid-template-columns: 1fr; }
+    .veritas-footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media(max-width: 640px) {
+    .veritas-topbar-left, .veritas-tagline-top { display: none; }
+    .veritas-footer-grid { grid-template-columns: 1fr; }
+    .hud-metrics { gap: 10px; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1><b>MARKET</b>PULSE</h1>
-  <div><span class="dot" id="conn"></span><span id="sym">BTCUSD · Bitstamp</span></div>
-  <div id="px">—</div>
-  <div class="lat">feed latency <span id="lat">—</span> ms · <span id="tps">0</span> ticks/s</div>
-  <div class="lat">open interest <span id="oi">—</span> · funding <span id="fund">—</span></div>
+
+<!-- Veritas Top Editorial Utility Bar -->
+<div class="veritas-topbar">
+  <div class="veritas-topbar-left">
+    <div class="veritas-date" id="liveDate">Thursday, October 29, 2026</div>
+    <div class="veritas-tagline-top">Where the truth speaks itself · Real-Time Financial Intelligence</div>
+  </div>
+  <div class="veritas-topbar-right">
+    <div class="veritas-search" title="Filter live wire & symbols">
+      <input type="search" id="vSearch" placeholder="Search news & stocks..." autocomplete="off">
+      <i class="fa fa-search"></i>
+    </div>
+    <div class="live-cta" aria-label="Live Market Stream Active">
+      <span class="live-cta-dot" aria-hidden="true"></span>
+      <span>LIVE</span>
+    </div>
+  </div>
+</div>
+
+<!-- Veritas Brand Masthead -->
+<div class="veritas-masthead">
+  <div class="veritas-brand">
+    <div class="veritas-brand-sub">Real-Time Global Financial Intelligence</div>
+    <div class="veritas-brand-title">THE VERITAS <span class="slash">/</span> <b>MARKETPULSE</b></div>
+    <div class="veritas-brand-tagline">"Where the truth speaks itself — One terminal for global macro, crypto, indices & predictive AI"</div>
+  </div>
+</div>
+
+<!-- Real-time Market HUD Strip -->
+<header class="veritas-hud">
+  <div class="hud-left">
+    <div class="hud-symbol-badge">
+      <span class="dot" id="conn" title="WebSocket status"></span>
+      <span id="sym">BTCUSD · Bitstamp</span>
+    </div>
+    <div id="px">—</div>
+  </div>
+  <div class="hud-metrics">
+    <div class="metric-item">
+      <span class="metric-label">Feed Latency</span>
+      <span class="metric-val"><span id="lat">—</span> ms</span>
+    </div>
+    <span style="color:rgba(255,255,255,0.1)">|</span>
+    <div class="metric-item">
+      <span class="metric-label">Velocity</span>
+      <span class="metric-val"><span id="tps">0</span> ticks/s</span>
+    </div>
+    <span style="color:rgba(255,255,255,0.1)">|</span>
+    <div class="metric-item">
+      <span class="metric-label">Binance OI</span>
+      <span class="metric-val" id="oi">—</span>
+    </div>
+    <span style="color:rgba(255,255,255,0.1)">|</span>
+    <div class="metric-item">
+      <span class="metric-label">Funding (8h)</span>
+      <span class="metric-val" id="fund">—</span>
+    </div>
+  </div>
 </header>
+
+<!-- Veritas Section Navigation Ribbon -->
+<nav class="veritas-nav-ribbon" aria-label="Section navigation">
+  <a class="veritas-nav-item active" onclick="scrollToSection('sec-chart')">BTCUSD OHLCV</a>
+  <a class="veritas-nav-item" onclick="scrollToSection('sec-forecast')">AI Forecaster</a>
+  <a class="veritas-nav-item" onclick="scrollToSection('sec-nse')">NSE Indices</a>
+  <a class="veritas-nav-item" onclick="scrollToSection('sec-nifty')">NIFTY 50 Heatmap</a>
+  <a class="veritas-nav-item" onclick="scrollToSection('sec-news')">News Wire</a>
+  <a class="veritas-nav-item" onclick="scrollToSection('sec-crypto')">Crypto 24H</a>
+  <a class="veritas-nav-item" onclick="scrollToSection('sec-brief')">Macro Analyst Brief</a>
+</nav>
+
+<!-- Main Terminal Grid -->
 <main>
-  <section><h2>BTCUSD · 1m · LIVE + MODEL FORECAST</h2><div id="chart"></div></section>
-  <section>
-    <h2>FORECAST MODEL</h2><div id="fc"></div>
-    <h2 style="margin-top:14px">PAPER TRADING (₮100,000 start, fees on)</h2><div id="paper"></div>
+  <!-- Chart Section -->
+  <section id="sec-chart">
+    <div class="card-header">
+      <h2>BTCUSD · 1m · LIVE + MODEL FORECAST</h2>
+      <span class="badge-tag">STREAMING WS</span>
+    </div>
+    <div id="chart"></div>
   </section>
-  <section>
-    <h2>NSE INDICES <span class="legend"><i style="background:rgba(22,199,132,.85)">+3%</i><i style="background:rgba(22,199,132,.35)">+1%</i><i style="background:rgba(234,57,67,.35)">−1%</i><i style="background:rgba(234,57,67,.85)">−3%</i></span></h2>
-    <div class="chips" id="cats"></div><div class="heat" id="idx"></div>
-    <h2 id="nseTitle" style="margin-top:14px">NIFTY 50 HEATMAP</h2><div class="heat" id="nse"></div>
+
+  <!-- Forecast Model & Paper Trading Section -->
+  <section id="sec-forecast">
+    <div class="card-header">
+      <h2>FORECAST MODEL</h2>
+      <span class="badge-tag">KRONOS FOUNDATION</span>
+    </div>
+    <div id="fc"></div>
+
+    <div class="sub-h2">PAPER TRADING ($100,000 start, fees on)</div>
+    <div id="paper"></div>
   </section>
-  <section><h2>NEWS FLOW</h2><div class="chips" id="mkts"></div><ul id="news"></ul></section>
-  <section><h2>CRYPTO HEATMAP · 24H</h2><div class="heat" id="crypto"></div></section>
-  <section><h2>AI ANALYST <button onclick="regen()">refresh</button></h2><div id="brief">Warming up…</div></section>
+
+  <!-- NSE Equities & Indices Section -->
+  <section id="sec-nse">
+    <div class="card-header">
+      <h2>NSE INDICES 
+        <span class="legend">
+          <i style="background:rgba(16,185,129,.85)">+3%</i>
+          <i style="background:rgba(16,185,129,.35)">+1%</i>
+          <i style="background:rgba(222,2,22,.35)">−1%</i>
+          <i style="background:rgba(222,2,22,.85)">−3%</i>
+        </span>
+      </h2>
+    </div>
+    <div class="chips" id="cats"></div>
+    <div class="heat" id="idx"></div>
+
+    <div class="card-header" style="margin-top:16px;">
+      <h2 id="nseTitle">NIFTY 50 HEATMAP</h2>
+      <span class="badge-tag">DOMESTIC EQUITIES</span>
+    </div>
+    <div class="heat" id="nse"></div>
+  </section>
+
+  <!-- News Flow Wire Section -->
+  <section id="sec-news">
+    <div class="card-header">
+      <h2>NEWS FLOW</h2>
+      <span class="badge-tag">RSS REAL-TIME</span>
+    </div>
+    <div class="chips" id="mkts"></div>
+    <ul id="news"></ul>
+  </section>
+
+  <!-- Crypto Heatmap Section -->
+  <section id="sec-crypto">
+    <div class="card-header">
+      <h2>CRYPTO HEATMAP · 24H</h2>
+      <span class="badge-tag">BINANCE LIQUIDITY</span>
+    </div>
+    <div class="heat" id="crypto"></div>
+  </section>
+
+  <!-- AI Analyst Brief Section -->
+  <section id="sec-brief">
+    <div class="card-header">
+      <h2>AI ANALYST</h2>
+      <button onclick="regen()"><i class="fa fa-sync-alt" style="margin-right:4px;"></i>refresh</button>
+    </div>
+    <div id="brief"><div class="veritas-loader-wrap"><div class="veritas-loader"></div><span>Warming up Veritas intelligence model…</span></div></div>
+  </section>
 </main>
+
+<!-- The Veritas Signature Footer -->
+<footer class="veritas-footer">
+  <div class="veritas-footer-inner">
+    <div class="veritas-footer-grid">
+      <div>
+        <div class="veritas-footer-logo-title">THE VERITAS <span>/</span> MARKETPULSE</div>
+        <p class="veritas-footer-tagline">Where the truth speaks itself.</p>
+        <p class="veritas-footer-mission">Independent market surveillance & predictive AI engine committed to zero-latency truth, institutional verification, and quantitative transparency across Indian and global asset classes.</p>
+      </div>
+      <div>
+        <div class="veritas-footer-col-heading">Market Modules</div>
+        <ul class="veritas-footer-links">
+          <li><a class="veritas-footer-link" onclick="scrollToSection('sec-chart')">Bitstamp 1m Candles</a></li>
+          <li><a class="veritas-footer-link" onclick="scrollToSection('sec-forecast')">Kronos OHLCV Forecast</a></li>
+          <li><a class="veritas-footer-link" onclick="scrollToSection('sec-nse')">NSE Heatmap & Sectors</a></li>
+          <li><a class="veritas-footer-link" onclick="scrollToSection('sec-crypto')">Binance 24H Liquidity</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="veritas-footer-col-heading">Data Feeds</div>
+        <ul class="veritas-footer-links">
+          <li><span class="veritas-footer-link veritas-footer-link--live"><span class="veritas-footer-live-dot"></span>Bitstamp WS (Trades)</span></li>
+          <li><span class="veritas-footer-link veritas-footer-link--live"><span class="veritas-footer-live-dot"></span>NSE India Poller</span></li>
+          <li><span class="veritas-footer-link veritas-footer-link--live"><span class="veritas-footer-live-dot"></span>Binance Futures OI</span></li>
+          <li><span class="veritas-footer-link veritas-footer-link--live"><span class="veritas-footer-live-dot"></span>Multi-Source RSS Wire</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="veritas-footer-col-heading">Investor Intelligence</div>
+        <p style="font-size:0.8rem; color:rgba(255,255,255,0.4); margin-bottom:8px;">Subscribe to the Veritas Morning Intelligence Briefing.</p>
+        <input type="email" class="veritas-newsletter-input" placeholder="investor@firm.com">
+        <button class="veritas-newsletter-btn" onclick="alert('Subscription verified for Veritas Intelligence Brief.')">Subscribe</button>
+      </div>
+    </div>
+    <div class="veritas-footer-bottom">
+      <div>&copy; 2026 The Veritas &middot; MarketPulse. All rights reserved. Zero-latency stream.</div>
+      <div>Privacy Policy &middot; Terms &amp; Conditions &middot; Editorial Verification &middot; Model Disclosures</div>
+    </div>
+  </div>
+</footer>
+
 <script>
 const $ = id => document.getElementById(id);
 const fmt = (n, d = 2) => n == null ? "—" : Number(n).toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-const chart = LightweightCharts.createChart($("chart"), {layout:{background:{color:"#12151a"},textColor:"#7c8592"},
-  grid:{vertLines:{color:"#1a1e25"},horzLines:{color:"#1a1e25"}}, timeScale:{timeVisible:true}, autoSize:true});
-const candles = chart.addCandlestickSeries({upColor:"#16c784",downColor:"#ea3943",borderVisible:false,wickUpColor:"#16c784",wickDownColor:"#ea3943"});
-const fcLine = chart.addLineSeries({color:"#f0b90b",lineWidth:2,lineStyle:2});
+function scrollToSection(id) {
+  const el = $(id);
+  if (el) el.scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+// Live date ticker in Veritas editorial style
+function updateLiveDate() {
+  const now = new Date();
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' };
+  const dStr = now.toLocaleDateString('en-US', options);
+  const tStr = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: false }) + ' IST';
+  if ($("liveDate")) $("liveDate").textContent = `${dStr} · ${tStr}`;
+}
+setInterval(updateLiveDate, 1000);
+updateLiveDate();
+
+// Lightweight Charts initialized with The Veritas dark theme
+const chart = LightweightCharts.createChart($("chart"), {
+  layout: {
+    background: { color: "#0a0c12" },
+    textColor: "#94a3b8",
+    fontSize: 11,
+    fontFamily: "'JetBrains Mono', monospace"
+  },
+  grid: {
+    vertLines: { color: "rgba(255, 255, 255, 0.04)" },
+    horzLines: { color: "rgba(255, 255, 255, 0.04)" }
+  },
+  timeScale: {
+    timeVisible: true,
+    borderColor: "rgba(255, 255, 255, 0.08)"
+  },
+  rightPriceScale: {
+    borderColor: "rgba(255, 255, 255, 0.08)"
+  },
+  autoSize: true
+});
+
+const candles = chart.addCandlestickSeries({
+  upColor: "#10b981",
+  downColor: "#de0216",
+  borderVisible: false,
+  wickUpColor: "#10b981",
+  wickDownColor: "#de0216"
+});
+
+// Forecast path line styled with Veritas gold/amber
+const fcLine = chart.addLineSeries({
+  color: "#fecc1c",
+  lineWidth: 2,
+  lineStyle: 2
+});
+
 const toBar = c => ({time: c.t / 1000 + 19800, open: c.o, high: c.h, low: c.l, close: c.c}); // shift to IST for axis labels
 
-// heat colour: clamp ±3% to a red/green ramp
-const heatBg = chg => { const a = Math.min(Math.abs(chg) / 3, 1) * .75 + .1; return chg >= 0 ? `rgba(22,199,132,${a})` : `rgba(234,57,67,${a})`; };
+// Veritas signature heat colour: emerald for gains, signature Veritas red for drops
+const heatBg = chg => { 
+  const a = Math.min(Math.abs(chg) / 3, 1) * 0.75 + 0.12; 
+  return chg >= 0 ? `rgba(16, 185, 129, ${a})` : `rgba(222, 2, 22, ${a})`; 
+};
+
 const heat = {nse: {}, crypto: {}};
 function drawHeat(id, data, sizeKey) {
   Object.assign(heat[id], data);
   const rows = Object.entries(heat[id]).filter(([k]) => k !== "__index__")
     .sort((a, b) => (b[1][sizeKey] || 0) - (a[1][sizeKey] || 0));
-  $(id).innerHTML = rows.map(([s, v]) => `<div class="tile" style="background:${heatBg(v.chg)}"><b>${esc(s.replace("USDT",""))}</b><span>${v.chg >= 0 ? "+" : ""}${fmt(v.chg)}%</span></div>`).join("");
+  $(id).innerHTML = rows.map(([s, v]) => `
+    <div class="tile" style="background:${heatBg(v.chg)}" data-sym="${esc(s)}">
+      <b>${esc(s.replace("USDT",""))}</b>
+      <span>${v.chg >= 0 ? "+" : ""}${fmt(v.chg)}%</span>
+    </div>
+  `).join("");
   const ix = heat.nse.__index__;
-  if (id === "nse" && ix) $("nseTitle").innerHTML = `${esc(ix.name)} HEATMAP · <span class="${ix.chg>=0?"up":"down"}">${fmt(ix.p)} (${ix.chg>=0?"+":""}${fmt(ix.chg)}%)</span>`;
+  if (id === "nse" && ix) {
+    $("nseTitle").innerHTML = `${esc(ix.name)} HEATMAP · <span class="${ix.chg>=0?"up":"down"}">${fmt(ix.p)} (${ix.chg>=0?"+":""}${fmt(ix.chg)}%)</span>`;
+  }
 }
 
-// News Flow-style: market filter chips, "x min ago" that keeps ticking, new headlines flash twice
+// News Flow: market filter chips, live relative ticking, flash on new items
 let mkt = "All";
-const ago = ts => { const s = (Date.now() - ts) / 1000; return s < 60 ? "just now" : s < 3600 ? `${s / 60 | 0} min ago` : s < 86400 ? `${s / 3600 | 0} h ago` : new Date(ts).toLocaleDateString(); };
-const applyMkt = () => [...$("news").children].forEach(li => li.classList.toggle("hide", mkt !== "All" && li.dataset.m !== mkt));
+const ago = ts => { 
+  const s = (Date.now() - ts) / 1000; 
+  return s < 60 ? "just now" : s < 3600 ? `${s / 60 | 0}m ago` : s < 86400 ? `${s / 3600 | 0}h ago` : new Date(ts).toLocaleDateString(); 
+};
+
+const applyMkt = () => {
+  const query = ($("vSearch") ? $("vSearch").value.trim().toLowerCase() : "");
+  [...$("news").children].forEach(li => {
+    const matchMkt = (mkt === "All" || li.dataset.m === mkt);
+    const matchSearch = (!query || li.textContent.toLowerCase().includes(query));
+    li.classList.toggle("hide", !(matchMkt && matchSearch));
+  });
+};
+
 $("mkts").innerHTML = ["All", "India", "Global", "Crypto"].map(m => `<button class="${m === mkt ? "on" : ""}">${m}</button>`).join("");
-$("mkts").onclick = e => { if (e.target.tagName !== "BUTTON") return; mkt = e.target.textContent;
-  [...$("mkts").children].forEach(b => b.classList.toggle("on", b === e.target)); applyMkt(); };
+$("mkts").onclick = e => { 
+  if (e.target.tagName !== "BUTTON") return; 
+  mkt = e.target.textContent;
+  [...$("mkts").children].forEach(b => b.classList.toggle("on", b === e.target)); 
+  applyMkt(); 
+};
+
+if ($("vSearch")) {
+  $("vSearch").addEventListener("input", () => {
+    applyMkt();
+    const q = $("vSearch").value.trim().toLowerCase();
+    document.querySelectorAll(".tile").forEach(t => {
+      const sym = (t.dataset.sym || "").toLowerCase();
+      if (q && !sym.includes(q)) {
+        t.style.opacity = "0.2";
+      } else {
+        t.style.opacity = "1";
+      }
+    });
+  });
+}
+
 setInterval(() => document.querySelectorAll("#news small[data-ts]").forEach(s => s.lastChild.textContent = ago(+s.dataset.ts)), 30000);
+
 function addNews(n, fresh) {
   const li = document.createElement("li");
   li.dataset.m = n.market || "";
   if (fresh) li.className = "new";
-  if (mkt !== "All" && li.dataset.m !== mkt) li.classList.add("hide");
-  li.innerHTML = `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a><small data-ts="${n.ts}">${esc(n.src)} · ${esc(n.market || "")} · <span>${ago(n.ts)}</span></small>`;
+  const query = ($("vSearch") ? $("vSearch").value.trim().toLowerCase() : "");
+  const matchMkt = (mkt === "All" || li.dataset.m === mkt);
+  const matchSearch = (!query || (n.title && n.title.toLowerCase().includes(query)));
+  if (!(matchMkt && matchSearch)) li.classList.add("hide");
+
+  li.innerHTML = `
+    <a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a>
+    <small data-ts="${n.ts}">
+      <span class="news-badge">${esc(n.src)}</span>
+      <span>${esc(n.market || "General")}</span>
+      <span>&middot;</span>
+      <span>${ago(n.ts)}</span>
+    </small>
+  `;
   $("news").prepend(li);
   while ($("news").children.length > 60) $("news").lastChild.remove();
 }
 
-// NSE index heatmap with the same 4 category tabs as nseindia.com
+// NSE index heatmap with 4 category tabs
 let cat = "Broad Market Indices", indices = {};
 function drawIdx(d) {
   if (d) indices = d;
   $("cats").innerHTML = Object.keys(indices).map(c => `<button class="${c === cat ? "on" : ""}">${esc(c.replace(" Indices", ""))}</button>`).join("");
-  $("idx").innerHTML = (indices[cat] || []).map(i => `<div class="tile" style="background:${heatBg(i.chg)}"><b>${esc(i.name)}</b><span>${fmt(i.p)} · ${i.chg >= 0 ? "+" : ""}${fmt(i.chg)}%</span></div>`).join("");
+  $("idx").innerHTML = (indices[cat] || []).map(i => `
+    <div class="tile" style="background:${heatBg(i.chg)}" data-sym="${esc(i.name)}">
+      <b>${esc(i.name)}</b>
+      <span>${fmt(i.p)} · ${i.chg >= 0 ? "+" : ""}${fmt(i.chg)}%</span>
+    </div>
+  `).join("");
 }
-$("cats").onclick = e => { if (e.target.tagName !== "BUTTON") return; cat = Object.keys(indices).find(c => c.startsWith(e.target.textContent)); drawIdx(); };
-const drawDeriv = d => { $("oi").textContent = `$${fmt(d.oi_usd / 1e9)}B`; $("fund").textContent = `${fmt(d.funding_pct, 4)}%`; };
+$("cats").onclick = e => { 
+  if (e.target.tagName !== "BUTTON") return; 
+  cat = Object.keys(indices).find(c => c.startsWith(e.target.textContent)); 
+  drawIdx(); 
+};
+
+const drawDeriv = d => { 
+  $("oi").textContent = `$${fmt(d.oi_usd / 1e9)}B`; 
+  $("fund").textContent = `${fmt(d.funding_pct, 4)}%`; 
+};
 
 function drawForecast(f) {
-  const cls = f.ret_pct >= 0 ? "up" : "down", acc = f.acc.n ? `${fmt(100 * f.acc.hits / f.acc.n, 1)}% (${f.acc.n})` : "scoring…";
-  $("fc").innerHTML = `<div class="kv"><span>engine</span><span>${esc(f.engine)}</span></div>
-    <div class="kv"><span>next ${f.horizon_min}m</span><span class="${cls}">${f.ret_pct>=0?"+":""}${fmt(f.ret_pct,3)}% → ${fmt(f.path.at(-1))}</span></div>
-    <div class="kv"><span>live direction hit-rate</span><span>${acc}</span></div>`;
+  const cls = f.ret_pct >= 0 ? "up" : "down";
+  const acc = f.acc.n ? `${fmt(100 * f.acc.hits / f.acc.n, 1)}% (${f.acc.n})` : "scoring…";
+  $("fc").innerHTML = `
+    <div class="kv"><span>ENGINE</span><span style="color:#fecc1c">${esc(f.engine)}</span></div>
+    <div class="kv"><span>HORIZON ${f.horizon_min}M</span><span class="${cls}">${f.ret_pct>=0?"+":""}${fmt(f.ret_pct,3)}% → ${fmt(f.path.at(-1))}</span></div>
+    <div class="kv"><span>LIVE DIRECTION HIT-RATE</span><span style="color:${f.acc.n && (f.acc.hits/f.acc.n >= 0.5) ? 'var(--veritas-emerald)' : '#fff'}">${acc}</span></div>
+  `;
   fcLine.setData(f.path.map((p, i) => ({time: f.from_t / 1000 + 19800 + 60 * (i + 1), value: p})));
 }
 
 function drawPaper(p) {
-  $("paper").innerHTML = `<div class="kv"><span>equity</span><span>${fmt(p.equity)}</span></div>
-    <div class="kv"><span>P&amp;L</span><span class="${p.pnl_pct>=0?"up":"down"}">${p.pnl_pct>=0?"+":""}${fmt(p.pnl_pct,3)}%</span></div>
-    <div class="kv"><span>position · trades</span><span>${p.pos} · ${p.n}</span></div>`;
+  $("paper").innerHTML = `
+    <div class="kv"><span>PORTFOLIO EQUITY</span><span style="color:#fff;">$${fmt(p.equity)}</span></div>
+    <div class="kv"><span>CUMULATIVE P&amp;L</span><span class="${p.pnl_pct>=0?"up":"down"}">${p.pnl_pct>=0?"+":""}${fmt(p.pnl_pct,3)}%</span></div>
+    <div class="kv"><span>ACTIVE POSITION · TRADES</span><span>${esc(p.pos)} · ${p.n}</span></div>
+  `;
 }
 
 let ticks = 0, lastPx = 0;
 setInterval(() => { $("tps").textContent = ticks; ticks = 0; }, 1000);
+
 const handlers = {
   snapshot(s) {
-    candles.setData(s.candles.map(toBar));
-    drawHeat("nse", s.nse_heat, "vol"); drawIdx(s.nse_indices); s.deriv && drawDeriv(s.deriv); drawHeat("crypto", s.crypto_heat, "vol");
-    $("news").innerHTML = ""; s.news.slice().reverse().forEach(n => addNews(n));
-    s.forecast && drawForecast(s.forecast); s.paper && drawPaper(s.paper); s.brief && ($("brief").textContent = s.brief.text);
+    if (s.candles) candles.setData(s.candles.map(toBar));
+    if (s.nse_heat) drawHeat("nse", s.nse_heat, "vol"); 
+    if (s.nse_indices) drawIdx(s.nse_indices); 
+    if (s.deriv) drawDeriv(s.deriv); 
+    if (s.crypto_heat) drawHeat("crypto", s.crypto_heat, "vol");
+    if (s.news) {
+      $("news").innerHTML = ""; 
+      s.news.slice().reverse().forEach(n => addNews(n));
+    }
+    if (s.forecast) drawForecast(s.forecast); 
+    if (s.paper) drawPaper(s.paper); 
+    if (s.brief) formatBrief(s.brief.text);
   },
   btc(t, src) {
     ticks++;
     $("px").textContent = fmt(t.p);
-    $("px").className = t.p >= lastPx ? "up" : "down"; lastPx = t.p;
-    $("lat").textContent = Math.max(0, Date.now() - src); // exchange timestamp -> browser (needs synced clocks)
+    $("px").className = t.p >= lastPx ? "up" : "down"; 
+    lastPx = t.p;
+    $("lat").textContent = Math.max(0, Date.now() - src); // exchange timestamp -> browser
   },
   candle: c => candles.update(toBar(c)),
   nse_heat: d => drawHeat("nse", d, "vol"),
-  nse_indices: drawIdx, deriv: drawDeriv,
+  nse_indices: drawIdx, 
+  deriv: drawDeriv,
   crypto_heat: d => drawHeat("crypto", d, "vol"),
   news: n => addNews(n, true),
   news_reset: list => { $("news").innerHTML = ""; list.slice().reverse().forEach(n => addNews(n)); },
-  forecast: drawForecast, paper: drawPaper,
-  brief: b => $("brief").textContent = b.text,
+  forecast: drawForecast, 
+  paper: drawPaper,
+  brief: b => formatBrief(b.text),
 };
+
+function formatBrief(text) {
+  if (!text) return;
+  // Format citations like [Bitstamp], [NSE], [Model] into badge highlights
+  const formatted = esc(text).replace(/\[(.*?)\]/g, '<span style="background:rgba(222,2,22,0.15);border:1px solid rgba(222,2,22,0.4);color:#ff6b75;padding:1px 5px;border-radius:3px;font-size:10px;font-family:var(--font-mono);font-weight:600;">[$1]</span>');
+  $("brief").innerHTML = formatted;
+}
 
 function connect() {
   const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
@@ -148,7 +1210,17 @@ function connect() {
   ws.onclose = () => { $("conn").classList.remove("on"); setTimeout(connect, 1500); };
 }
 connect();
-async function regen() { $("brief").textContent = "Thinking…"; const b = await (await fetch("/api/brief")).json(); $("brief").textContent = b.text; }
+
+async function regen() { 
+  $("brief").innerHTML = `<div class="veritas-loader-wrap"><div class="veritas-loader"></div><span>Generating Veritas Macro Analysis...</span></div>`; 
+  try {
+    const res = await fetch("/api/brief");
+    const b = await res.json(); 
+    formatBrief(b.text);
+  } catch (err) {
+    $("brief").textContent = "Error generating brief.";
+  }
+}
 </script>
 </body>
 </html>
